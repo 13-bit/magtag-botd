@@ -91,16 +91,16 @@ magtag.graphics.set_background("bmps/botd-bg.bmp")
 # ----------------------------
 botd = get_botd_data()
 
-font_monogram_14 = bitmap_font.load_font("fonts/monogram-14.pcf")
-font_monogram_12 = bitmap_font.load_font("fonts/monogram-12.pcf")
+font_common_name = bitmap_font.load_font("fonts/monogram-18.pcf")
+font_scientific_name = bitmap_font.load_font("fonts/monogram-12.pcf")
 
 common_name = label.Label(
-    font_monogram_14, text=botd["bird"]["comName"], color=0x000000)
+    font_common_name, text=botd["bird"]["comName"], color=0x000000)
 common_name.anchor_point = (0, 0.5)
 common_name.anchored_position = (90, 92)
 
 scientific_name = label.Label(
-    font_monogram_12, text=botd["bird"]["sciName"], color=0x000000)
+    font_scientific_name, text=botd["bird"]["sciName"], color=0x000000)
 scientific_name.anchor_point = (0, 0.5)
 scientific_name.anchored_position = (90, 106)
 
