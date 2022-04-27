@@ -84,6 +84,15 @@ HTTPS_SESSION = connect_wifi()
 # ----------------------------
 magtag = MagTag()
 
+neopixel_colors = ((235, 61, 0), (235, 61, 0), (235, 61, 0), (235, 61, 0))
+magtag.peripherals.neopixel_disable = False
+
+magtag.peripherals.neopixels[0] = neopixel_colors[0]
+magtag.peripherals.neopixels[1] = neopixel_colors[1]
+magtag.peripherals.neopixels[2] = neopixel_colors[2]
+magtag.peripherals.neopixels[3] = neopixel_colors[3]
+magtag.peripherals.neopixels.show()
+
 magtag.graphics.set_background("bmps/botd-bg.bmp")
 
 # ----------------------------
@@ -91,8 +100,8 @@ magtag.graphics.set_background("bmps/botd-bg.bmp")
 # ----------------------------
 botd = get_botd_data()
 
-font_common_name = bitmap_font.load_font("fonts/monogram-18.pcf")
-font_scientific_name = bitmap_font.load_font("fonts/monogram-12.pcf")
+font_common_name = bitmap_font.load_font("fonts/envypn7x15.bdf")
+font_scientific_name = bitmap_font.load_font("fonts/envypn7x13.bdf")
 
 common_name = label.Label(
     font_common_name, text=botd["bird"]["comName"], color=0x000000)
@@ -138,5 +147,7 @@ magtag.display.refresh()
 time.sleep(magtag.display.time_to_refresh + 1)
 
 print("Sleeping for %d seconds" % botd["untilTomorrow"])
+
+magtag.peripherals.neopixel_disable = True
 
 magtag.exit_and_deep_sleep(botd["untilTomorrow"])
