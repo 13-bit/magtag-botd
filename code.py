@@ -57,6 +57,18 @@ def download_qr_image():
 
     return bytes_img
 
+def download_life_history_image():
+    url = secrets["birdboard_server"] + "/static/life-history.bmp"
+
+    print("Fetching life history image from %s" % url)
+    response = HTTPS_SESSION.get(url)
+    print("GET complete")
+
+    bytes_img = BytesIO(response.content)
+
+    response.close()
+
+    return bytes_img
 
 def get_botd_data():
     url = secrets["birdboard_server"] + "/botd"
@@ -129,6 +141,17 @@ botd_tile_grid = displayio.TileGrid(botd_image, pixel_shader=palette, width=1,
                                     height=1, tile_width=100, tile_height=75, default_tile=0, x=194, y=2)
 
 magtag.splash.append(botd_tile_grid)
+
+# ----------------------------
+# Download and display the life history image
+# ----------------------------
+lh_bytes = download_life_history_image()
+
+lh_image, palette = adafruit_imageload.load(lh_bytes)
+lh_tile_grid = displayio.TileGrid(lh_image, pixel_shader=palette, width=1,
+                                    height=1, tile_width=76, tile_height=76, default_tile=0, x=100, y=2)
+
+magtag.splash.append(lh_tile_grid)
 
 # ----------------------------
 # Download and display the QR Code image
