@@ -22,20 +22,42 @@ except ImportError:
 def connect_wifi():
     wifi.radio.connect(secrets["ssid"], secrets["password"])
 
-    print("My IP address is", wifi.radio.ipv4_address)
+    print("Connecting to %s from %s" % (secrets["ssid"], wifi.radio.ipv4_address), end ="... ")
 
     socket = socketpool.SocketPool(wifi.radio)
     https = requests.Session(socket, ssl.create_default_context())
 
+    print("Done.")
+
     return https
 
+def time_to_sleep():
+    TIME_URL = "https://io.adafruit.com/api/v2/%s/integrations/time/struct?x-aio-key=%s&tz=%s" % (aio_username, aio_key, aio_timezone)
+
+    response = HTTPS_SESSION.get(TIME_URL)
+    time_json = response.json()
+
+    now = time.struct_time(
+        (time_json["year"], time_json["mon"], time_json["mday"], time_json["hour"], time_json["min"], time_json["sec"], time_json["wday"], time_json["yday"], time_json["isdst"])
+    )
+
+    wake = time.struct_time(
+        (now[0], now[1], now[2], 5, 0, 0, -1, -1, now[8])
+    )
+
+    to_sleep = time.mktime(wake) - time.mktime(now)
+
+    if to_sleep < 0:
+        to_sleep += 24 * 60 * 60
+
+    return to_sleep, str(wake)
 
 def download_botd_image():
     url = secrets["birdboard_server"] + "/static/botd.bmp"
 
-    print("Fetching BOTD image from %s" % url)
+    print("Fetching BOTD image from %s" % url, end ="... ")
     response = HTTPS_SESSION.get(url)
-    print("GET complete")
+    print("Done.")
 
     bytes_img = BytesIO(response.content)
 
@@ -47,9 +69,9 @@ def download_botd_image():
 def download_qr_image():
     url = secrets["birdboard_server"] + "/static/qr.bmp"
 
-    print("Fetching QR code from %s" % url)
+    print("Fetching QR code from %s" % url, end ="... ")
     response = HTTPS_SESSION.get(url)
-    print("GET complete")
+    print("Done.")
 
     bytes_img = BytesIO(response.content)
 
@@ -60,9 +82,9 @@ def download_qr_image():
 def download_life_history_image():
     url = secrets["birdboard_server"] + "/static/life-history.bmp"
 
-    print("Fetching life history image from %s" % url)
+    print("Fetching life history image from %s" % url, end ="... ")
     response = HTTPS_SESSION.get(url)
-    print("GET complete")
+    print("Done.")
 
     bytes_img = BytesIO(response.content)
 
@@ -73,9 +95,9 @@ def download_life_history_image():
 def get_botd_data():
     url = secrets["birdboard_server"] + "/botd"
 
-    print("Fetching BOTD data from %s" % url)
+    print("Fetching BOTD data from %s" % url, end ="... ")
     response = HTTPS_SESSION.get(url)
-    print("GET complete")
+    print("Done.")
 
     data = response.json()
 
@@ -85,17 +107,18 @@ def get_botd_data():
 
     return data
 
-
-# ----------------------------
-# Connect to the wifi and get the HTTPS session
-# ----------------------------
-HTTPS_SESSION = connect_wifi()
-
-# ----------------------------
-# Layout the UI
-# ----------------------------
+# Instantiate the MagTag
 magtag = MagTag()
 
+# Connect to wifi and get the HTTPS session
+HTTPS_SESSION = connect_wifi()
+
+# Secrets
+aio_username = secrets["aio_username"]
+aio_key = secrets["aio_key"]
+aio_timezone = secrets["timezone"]
+
+# Layout the UI
 neopixel_colors = ((235, 61, 0), (235, 61, 0), (235, 61, 0), (235, 61, 0))
 magtag.peripherals.neopixel_disable = False
 
@@ -107,9 +130,7 @@ magtag.peripherals.neopixels.show()
 
 magtag.graphics.set_background("bmps/botd-bg.bmp")
 
-# ----------------------------
 # Display the scientific and common names
-# ----------------------------
 botd = get_botd_data()
 
 font_common_name = bitmap_font.load_font("fonts/envypn7x15.bdf")
@@ -131,9 +152,7 @@ name_banner.append(scientific_name)
 
 magtag.splash.append(name_banner)
 
-# ----------------------------
 # Download and display the BOTD image
-# ----------------------------
 botd_bytes = download_botd_image()
 
 botd_image, palette = adafruit_imageload.load(botd_bytes)
@@ -142,9 +161,7 @@ botd_tile_grid = displayio.TileGrid(botd_image, pixel_shader=palette, width=1,
 
 magtag.splash.append(botd_tile_grid)
 
-# ----------------------------
 # Download and display the life history image
-# ----------------------------
 lh_bytes = download_life_history_image()
 
 lh_image, palette = adafruit_imageload.load(lh_bytes)
@@ -153,9 +170,7 @@ lh_tile_grid = displayio.TileGrid(lh_image, pixel_shader=palette, width=1,
 
 magtag.splash.append(lh_tile_grid)
 
-# ----------------------------
 # Download and display the QR Code image
-# ----------------------------
 qr_bytes = download_qr_image()
 
 qr_image, palette = adafruit_imageload.load(qr_bytes)
@@ -169,8 +184,10 @@ time.sleep(magtag.display.time_to_refresh + 1)
 magtag.display.refresh()
 time.sleep(magtag.display.time_to_refresh + 1)
 
-print("Sleeping for %d seconds" % botd["untilTomorrow"])
+until_tomorrow, wake = time_to_sleep()
+
+print("Sleeping for %d seconds until %s" % (until_tomorrow, wake))
 
 magtag.peripherals.neopixel_disable = True
 
-magtag.exit_and_deep_sleep(botd["untilTomorrow"])
+magtag.exit_and_deep_sleep(until_tomorrow)
