@@ -152,6 +152,14 @@ name_banner.append(scientific_name)
 
 magtag.splash.append(name_banner)
 
+# Display the battery warning icon if the battery is lowß
+if magtag.peripherals.battery < 3.2:
+    battery_image, palette = adafruit_imageload.load("bmps/battery-warning.bmp")
+    battery_tile_grid = displayio.TileGrid(battery_image, pixel_shader=palette, width=1,
+                                        height=1, tile_width=24, tile_height=12, default_tile=0, x=270, y=110)
+
+    magtag.splash.append(battery_tile_grid)
+
 # Download and display the BOTD image
 botd_bytes = download_botd_image()
 
@@ -179,7 +187,7 @@ qr_tile_grid = displayio.TileGrid(qr_image, pixel_shader=palette, width=1,
 
 magtag.splash.append(qr_tile_grid)
 
-# refresh display
+# Refresh display
 time.sleep(magtag.display.time_to_refresh + 1)
 magtag.display.refresh()
 time.sleep(magtag.display.time_to_refresh + 1)
