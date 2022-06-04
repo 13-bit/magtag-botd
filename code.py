@@ -138,28 +138,6 @@ magtag.peripherals.neopixels.show()
 
 magtag.graphics.set_background("bmps/botd-bg.bmp")
 
-# Display the scientific and common names
-botd = get_botd_data()
-
-font_common_name = bitmap_font.load_font("fonts/envypn7x15.bdf")
-font_scientific_name = bitmap_font.load_font("fonts/envypn7x13.bdf")
-
-common_name = label.Label(
-    font_common_name, text=botd["bird"]["comName"], color=0x000000)
-common_name.anchor_point = (0, 0.5)
-common_name.anchored_position = (90, 92)
-
-scientific_name = label.Label(
-    font_scientific_name, text=botd["bird"]["sciName"], color=0x000000)
-scientific_name.anchor_point = (0, 0.5)
-scientific_name.anchored_position = (90, 106)
-
-name_banner = displayio.Group()
-name_banner.append(common_name)
-name_banner.append(scientific_name)
-
-magtag.splash.append(name_banner)
-
 # Display the battery warning icon if the battery is low
 if magtag.peripherals.battery < 3.2:
     battery_image, palette = adafruit_imageload.load(
@@ -195,6 +173,28 @@ qr_tile_grid = displayio.TileGrid(qr_image, pixel_shader=palette, width=1,
                                   height=1, tile_width=80, tile_height=80, default_tile=0, x=0, y=40)
 
 magtag.splash.append(qr_tile_grid)
+
+# Display the scientific and common names
+botd = get_botd_data()
+
+font_common_name = bitmap_font.load_font("fonts/envypn7x15.bdf")
+font_scientific_name = bitmap_font.load_font("fonts/envypn7x13.bdf")
+
+common_name = label.Label(
+    font_common_name, text=botd["bird"]["comName"], color=0x000000)
+common_name.anchor_point = (0, 0.5)
+common_name.anchored_position = (90, 92)
+
+scientific_name = label.Label(
+    font_scientific_name, text=botd["bird"]["sciName"], color=0x000000)
+scientific_name.anchor_point = (0, 0.5)
+scientific_name.anchored_position = (90, 106)
+
+name_banner = displayio.Group()
+name_banner.append(common_name)
+name_banner.append(scientific_name)
+
+magtag.splash.append(name_banner)
 
 # Refresh display
 time.sleep(magtag.display.time_to_refresh + 1)
