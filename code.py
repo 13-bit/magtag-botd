@@ -22,7 +22,8 @@ except ImportError:
 def connect_wifi():
     wifi.radio.connect(secrets["ssid"], secrets["password"])
 
-    print("Connecting to %s from %s" % (secrets["ssid"], wifi.radio.ipv4_address), end ="... ")
+    print("Connecting to %s from %s" %
+          (secrets["ssid"], wifi.radio.ipv4_address), end="... ")
 
     socket = socketpool.SocketPool(wifi.radio)
     https = requests.Session(socket, ssl.create_default_context())
@@ -31,14 +32,17 @@ def connect_wifi():
 
     return https
 
+
 def time_to_sleep():
-    TIME_URL = "https://io.adafruit.com/api/v2/%s/integrations/time/struct?x-aio-key=%s&tz=%s" % (aio_username, aio_key, aio_timezone)
+    TIME_URL = "https://io.adafruit.com/api/v2/%s/integrations/time/struct?x-aio-key=%s&tz=%s" % (
+        aio_username, aio_key, aio_timezone)
 
     response = HTTPS_SESSION.get(TIME_URL)
     time_json = response.json()
 
     now = time.struct_time(
-        (time_json["year"], time_json["mon"], time_json["mday"], time_json["hour"], time_json["min"], time_json["sec"], time_json["wday"], time_json["yday"], time_json["isdst"])
+        (time_json["year"], time_json["mon"], time_json["mday"], time_json["hour"], time_json["min"],
+         time_json["sec"], time_json["wday"], time_json["yday"], time_json["isdst"])
     )
 
     wake = time.struct_time(
@@ -52,10 +56,11 @@ def time_to_sleep():
 
     return to_sleep, str(wake)
 
+
 def download_botd_image():
     url = secrets["birdboard_server"] + "/static/botd.bmp"
 
-    print("Fetching BOTD image from %s" % url, end ="... ")
+    print("Fetching BOTD image from %s" % url, end="... ")
     response = HTTPS_SESSION.get(url)
     print("Done.")
 
@@ -69,7 +74,7 @@ def download_botd_image():
 def download_qr_image():
     url = secrets["birdboard_server"] + "/static/qr.bmp"
 
-    print("Fetching QR code from %s" % url, end ="... ")
+    print("Fetching QR code from %s" % url, end="... ")
     response = HTTPS_SESSION.get(url)
     print("Done.")
 
@@ -78,11 +83,12 @@ def download_qr_image():
     response.close()
 
     return bytes_img
+
 
 def download_life_history_image():
     url = secrets["birdboard_server"] + "/static/life-history.bmp"
 
-    print("Fetching life history image from %s" % url, end ="... ")
+    print("Fetching life history image from %s" % url, end="... ")
     response = HTTPS_SESSION.get(url)
     print("Done.")
 
@@ -92,10 +98,11 @@ def download_life_history_image():
 
     return bytes_img
 
+
 def get_botd_data():
     url = secrets["birdboard_server"] + "/botd"
 
-    print("Fetching BOTD data from %s" % url, end ="... ")
+    print("Fetching BOTD data from %s" % url, end="... ")
     response = HTTPS_SESSION.get(url)
     print("Done.")
 
@@ -106,6 +113,7 @@ def get_botd_data():
     print("BOTD data:", data)
 
     return data
+
 
 # Instantiate the MagTag
 magtag = MagTag()
@@ -152,11 +160,12 @@ name_banner.append(scientific_name)
 
 magtag.splash.append(name_banner)
 
-# Display the battery warning icon if the battery is lowß
+# Display the battery warning icon if the battery is low
 if magtag.peripherals.battery < 3.2:
-    battery_image, palette = adafruit_imageload.load("bmps/battery-warning.bmp")
+    battery_image, palette = adafruit_imageload.load(
+        "bmps/battery-warning.bmp")
     battery_tile_grid = displayio.TileGrid(battery_image, pixel_shader=palette, width=1,
-                                        height=1, tile_width=24, tile_height=12, default_tile=0, x=270, y=110)
+                                           height=1, tile_width=24, tile_height=12, default_tile=0, x=270, y=110)
 
     magtag.splash.append(battery_tile_grid)
 
@@ -165,7 +174,7 @@ botd_bytes = download_botd_image()
 
 botd_image, palette = adafruit_imageload.load(botd_bytes)
 botd_tile_grid = displayio.TileGrid(botd_image, pixel_shader=palette, width=1,
-                                    height=1, tile_width=100, tile_height=75, default_tile=0, x=194, y=2)
+                                    height=1, tile_width=botd_image.width, tile_height=botd_image.height, default_tile=0, x=194, y=2)
 
 magtag.splash.append(botd_tile_grid)
 
@@ -174,7 +183,7 @@ lh_bytes = download_life_history_image()
 
 lh_image, palette = adafruit_imageload.load(lh_bytes)
 lh_tile_grid = displayio.TileGrid(lh_image, pixel_shader=palette, width=1,
-                                    height=1, tile_width=76, tile_height=76, default_tile=0, x=100, y=2)
+                                  height=1, tile_width=76, tile_height=76, default_tile=0, x=100, y=2)
 
 magtag.splash.append(lh_tile_grid)
 
